@@ -2,50 +2,31 @@ var makeQueue = function(){
   // Hey! Rewrite in the new style. Your code will wind up looking very similar,
   // but try not not reference your old code in writing the new style.
 	var storage = {};
+	storage.removed = 0;
+	storage.added = 0;
    _.extend(storage, queueMethods);
    return storage
 };
 
-var queueMethods = {
+var queueMethods = {};
 
-	enqueue : function(value){
-		var tempArray = [];
-		console.log(this)
-		for(var key in this){
-			tempArray.push(key)
-		}
-		console.log(tempArray)
-		this[tempArray.length-3] = value
 
-	},
+queueMethods.enqueue = function(value) {
+	this[this.added] = value;
+	this.added ++
+}
 
-	dequeue : function(){
-		for(var key in this){
-			this[parseInt(key)-1] = this[key];
-			debugger;
-			delete this[key]
-		}
+queueMethods.dequeue = function() {
+	var returnItem = this[this.removed];
+	delete this[this.removed];
+	this.removed ++
+	return returnItem
+}
 
-		returnValue = this[-1];
-		delete this[-1];
-		return returnValue
-
-	},
-
-	size : function(){
-		var tempArray = [];
-		if(this[0]){
-			for(var key in this){
-				tempArray.push(key)
-			}
-			console.log(tempArray)
-			return tempArray.length -3
-		}else{
-			return 0;
-		}
+queueMethods.size = function(){
+	if(this.added < this.removed){
+		return 0;
 	}
+	return this.added - this.removed;
 
-};
-
-
-
+}
