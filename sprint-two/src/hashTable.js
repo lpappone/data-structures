@@ -14,8 +14,9 @@ HashTable.prototype.insert = function(k, v){
     this._storage.get(i).push(k,v);
     this._counter++;
   }
-
-  if(this._counter >= this._limit*.75){
+  console.log(this._limit, this._counter)
+  if(.75 <= this._counter/this._limit){
+    console.log(this._counter/this._limit)
     this.increaseSize();
   }
 
@@ -23,24 +24,21 @@ HashTable.prototype.insert = function(k, v){
 
 
 HashTable.prototype.increaseSize = function(){
-// i think we are not mapping these correctly?
     this._limit *= 2;
 
     this._newStore = this._storage;
-
-    this._storage = makeLimitedArray(this.limit)
-
-    var holder = this;
-    // use the each function to do this instead!
-    this._newStore.each(function(value, key, collection){
-		console.log(value, 'value', key, 'key')
-		console.log(holder)
-		holder.insert(key, value)
-	})
-
     this._storage.each(function(value, key, collection){
-		console.log(value, 'value', key, 'key')
-	})
+        console.log(collection, 'increaseSize')
+      })
+    this._storage = makeLimitedArray(this.limit)
+    // console.log(this._limit, 'limit')
+    var holder = this;
+    this._counter = 0;
+    this._newStore.each(function(value, key, collection){
+  		holder.insert(key, value)
+  	})
+
+
 };
 
 HashTable.prototype.retrieve = function(k){
@@ -71,29 +69,33 @@ HashTable.prototype.remove = function(k){
     }
   }
 
-  for(var k = 0; k < this._limit; k++){
-  	this._counter = 1*k
-  }
+
   // this should only run if number of items in storage is less than half the limit
   // if only one added, counter only goes up one and this will run!
-  if (this._counter <= this._limit*.75) {
-		this.decreaseSize()
+  if (this._counter >= 8 && .75 >= this._counter/this._limit) {
+		console.log('')
+    this.decreaseSize()
 	}
 
   return toDelete;
 };
 
 
-HashTable.prototype.decreaseSize = _.once(function(){
+HashTable.prototype.decreaseSize = function(){
     this._limit /= 2;
-
+    console.log(this._limit, 'limit')
     this._newStore = this._storage;
+    this._storage.each(function(value, key, collection){
+        console.log(collection, 'increaseSize')
+      })
     this._storage = makeLimitedArray(this.limit)
-
-    for(var key in this._newStore){
-      this.insert(key, this._newStore[key])
-    }
-})
+    // console.log(this._limit, 'limit')
+    var holder = this;
+    this._counter = 0;
+    this._newStore.each(function(value, key, collection){
+      holder.insert(key, value)
+    })
+}
 
 
 /*
