@@ -7,18 +7,18 @@ describe('hashTable', function() {
     hashTable = new HashTable();
   });
 
-  xit('should have methods named "insert", "remove", and "retrieve', function() {
+  it('should have methods named "insert", "remove", and "retrieve', function() {
     expect(hashTable.insert).to.be.a("function");
     expect(hashTable.remove).to.be.a("function");
     expect(hashTable.retrieve).to.be.a("function");
   });
 
-  xit('should store values that were inserted', function() {
+  it('should store values that were inserted', function() {
     hashTable.insert('Steven', 'Seagal');
     expect(hashTable.retrieve('Steven')).to.equal('Seagal');
   });
 
-  xit('should not contain values that were not inserted', function() {
+  it('should not contain values that were not inserted', function() {
     hashTable.insert('Steven', 'Spielberg');
     expect(hashTable.retrieve('Steven')).not.to.equal('Seagal');
   });
@@ -29,7 +29,7 @@ describe('hashTable', function() {
     expect(hashTable.retrieve('Steven')).to.equal(null);
   });
 
-  xit('should handle hash function collisions', function(){
+  it('should handle hash function collisions', function(){
     var v1 = "val1";
     var v2 = "val2";
     var oldHashFunction = window.getIndexBelowMaxForKey;
