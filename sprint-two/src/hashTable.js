@@ -1,24 +1,11 @@
 var HashTable = function(){
   this._limit = 8;
   this._storage = makeLimitedArray(this._limit);
-  //this._newStore;
   this._counter = 0;
 };
 
 HashTable.prototype.insert = function(k, v){
   var i = getIndexBelowMaxForKey(k, this._limit);
-  // if(this._storage.get(i) === undefined){
-  //   this._storage.set(i, [k,v]);
-  //   this._counter++;
-  // }else{
-  //   this._storage.get(i).push(k,v);
-  //   this._counter++;
-  // }
-  // console.log(this._limit, this._counter)
-  // if(.75 <= this._counter/this._limit){
-  //   console.log(this._counter/this._limit)
-  //   this.increaseSize();
-  // }
 
   var bucket = this._storage.get(i);
   if (!bucket) {
@@ -32,84 +19,79 @@ HashTable.prototype.insert = function(k, v){
     if (tuple[0] === k) {
       tuple[1] = v;
       found = true;
+      break;
     }
   }
+
   if (!found) {
     bucket.push([k, v]);
     this._counter++;
   }
+
+  if (this._counter > 0.75 * this._limit) {
+    this.resize(this._limit*2);
+  }
 };
 
-HashTable.prototype.increaseSize = function(){
-    this._limit *= 2;
+HashTable.prototype.resize = function(newSize){
+  var newStore = this._storage;
+  this._storage = makeLimitedArray(newSize);
+  this._limit = newSize;
+  this._counter = 0;
 
-    this._newStore = this._storage;
-    this._storage.each(function(value, key, collection){
-        console.log(collection, 'increaseSize')
-      })
-    this._storage = makeLimitedArray(this.limit)
-    var holder = this;
-    this._counter = 0;
-    this._newStore.each(function(value, key, collection){
-  		holder.insert(key, value)
-  	})
+  var context = this;
+
+  newStore.each(function(bucket) {
+    if (bucket === undefined) {return;}
+    for (var i = 0; i < bucket.length; i++) {
+      var tuple = bucket[i];
+      context.insert(tuple[0], tuple[1]);
+    }
+  })
 };
 
 HashTable.prototype.retrieve = function(k){
   var i = getIndexBelowMaxForKey(k, this._limit);
-  // var currentItem = this._storage.get(i);
-  // for(var j = 0; j < currentItem.length; j++){
-  //   if(currentItem[j] === k){
-  //     return currentItem[j+1];
-  //   }
-  // }
   var bucket = this._storage.get(i);
+  
+  if (!bucket) {
+    return null; 
+  }
+
   for (i = 0; i < bucket.length; i++) {
     var tuple = bucket[i];
     if (tuple[0] === k) {
       return tuple[1];
     }
   }
+  return null; 
 };
-
-
 
 HashTable.prototype.remove = function(k){
   var i = getIndexBelowMaxForKey(k, this._limit);
-  var currentItem = this._storage.get(i);
-  var toDelete;
-  // console.log(this._counter, 'this._counter before')
-  for(var j = 0; j < currentItem.length; j++){
-    if(currentItem[j] === k){
-      toDelete = currentItem[j+1];
-      currentItem[j+1] = null;
+  var bucket = this._storage.get(i);
+
+  if (!bucket) {
+    return null;
+  }
+
+  for (i = 0; i < bucket.length; i++){
+    var tuple = bucket[i];
+    if (tuple[0] === k) {
+      bucket.splice(i);
+      this._counter--;
+      if (this._counter < 0.25 * this._limit){
+        this.resize(this._limit/2)
+      }
+      return tuple[1];
     }
   }
-  // this should only run if number of items in storage is less than half the limit
-  // if only one added, counter only goes up one and this will run!
- //  if (this._counter >= 8 && .75 >= this._counter/this._limit) {
-	// 	console.log('')
- //    this.decreaseSize()
-	// }
-  return toDelete;
+  return null;
 };
 
 
-HashTable.prototype.decreaseSize = function(){
-    this._limit /= 2;
-    console.log(this._limit, 'limit')
-    this._newStore = this._storage;
-    this._storage.each(function(value, key, collection){
-        console.log(collection, 'increaseSize')
-      })
-    this._storage = makeLimitedArray(this.limit)
-    // console.log(this._limit, 'limit')
-    var holder = this;
-    this._counter = 0;
-    this._newStore.each(function(value, key, collection){
-      holder.insert(key, value)
-    })
-}
+
+
 
 
 /*
